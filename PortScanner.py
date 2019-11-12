@@ -19,9 +19,9 @@ class PortScanner():
         self.Sport = int(start_port)
         self.Eport = int(end_port)
         if flag:
-            self.threads = 50
+            self.threads = 100
         else:
-            self.threads = 30
+            self.threads = 50
 
     def run(self):
         print("-"*25 + "Start PortScanner" + "-"*25)
@@ -30,7 +30,7 @@ class PortScanner():
 
     def scan(self, port):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(2)
+        sock.settimeout(5)
         try:
             if sock.connect_ex((self.host, port)) == 0:
                 print("[+]Host:" + self.host + " is opening " + str(port))
@@ -52,8 +52,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Port Scanner',add_help=True)
     parser.add_argument('-u','--url',default=None,help='目标URL',type=str)
-    parser.add_argument('-p','--port',default="0-10000",help='待扫描的端口范围')
-    parser.add_argument('-m','--max',default=None,help='最高线程模式(max=50)',action="store_true")
+    parser.add_argument('-p','--port',default="1-65535",help='待扫描的端口范围(默认1-65535)')
+    parser.add_argument('-m','--max',default=None,help='最高线程模式(max=100)',action="store_true")
     args = parser.parse_args()
 
     if args.max:
