@@ -10,6 +10,8 @@
 import socket
 import concurrent.futures
 import datetime
+import argparse
+import sys,re
 
 class PortScanner():
     def __init__(self, host, start_port, end_port, flag):
@@ -44,9 +46,40 @@ class PortScanner():
             pass
         return True
 
-if __name__ == "__main__":
-    start_time = datetime.datetime.now()
-    portscanner = PortScanner("www.baidu.com",1,80,0)
-    portscanner.run()
-    spend_time = (datetime.datetime.now() - start_time).seconds
-    print("Total time: " + str(spend_time) + " seconds")
+if __name__ == "__main__":  
+    if len(sys.argv) == 1:
+        sys.argv.append('-h')
+
+    parser = argparse.ArgumentParser(description='Port Scanner',add_help=True)
+    parser.add_argument('-u','--url',default=None,help='目标URL',type=str)
+    parser.add_argument('-p','--port',default="0-10000",help='待扫描的端口范围')
+    parser.add_argument('-m','--max',default=None,help='最高线程模式(max=50)',action="store_true")
+    args = parser.parse_args()
+
+    if args.max:
+        flag = 1
+    else:
+        flag = 0
+
+    if args.url:
+        try:
+            url = re.sub('(http|https)://',"",args.url, re.I)
+            try:
+                port = args.port.split("-")
+                if len(port) > 2:
+                    print("Args for Port ERROR!")
+                    exit()
+                else:
+                    start = port[0]
+                    end = port[1]
+            except:
+                start = args.port
+                end = args.port
+            start_time = datetime.datetime.now()
+            portscanner = PortScanner(url, start, end, flag)
+            portscanner.run()
+            spend_time = (datetime.datetime.now() - start_time).seconds
+            print("Total time: " + str(spend_time) + " seconds")
+        except:
+            print("Args ERROR!")
+            exit()
