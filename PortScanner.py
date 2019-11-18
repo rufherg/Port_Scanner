@@ -3,7 +3,6 @@
 '''
 @Author: DEADF1SH_CAT
 @File: Port_Scanner.py
-@Time: 2019/11/07 21:40
 @About: 
 '''
 
