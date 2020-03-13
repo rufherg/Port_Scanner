@@ -3,7 +3,6 @@
 '''
 @Author: DEADF1SH_CAT
 @File: Port_Scanner.py
-@Time: 2019/11/07 21:40
 @About: 
 '''
 
@@ -92,7 +91,6 @@ if __name__ == "__main__":
             portscanner.run()
             spend_time = (datetime.datetime.now() - start_time).seconds
             print("Total time: " + str(spend_time) + " seconds")
-        except Exception as e :
-            print(e)
-            print("Something ERROR!")
+        except:
+            print("Args ERROR!")
             exit()
