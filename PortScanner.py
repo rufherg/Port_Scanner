@@ -8,7 +8,7 @@
 '''
 
 import socket
-import concurrent.futures
+import threading
 import datetime
 import argparse
 import sys,re
@@ -18,33 +18,45 @@ class PortScanner():
         self.host = socket.gethostbyname(host)
         self.Sport = int(start_port)
         self.Eport = int(end_port)
+        self.threadpool = list()
+
         if flag:
             self.threads = 100
         else:
             self.threads = 50
 
+        self.threadmax = threading.BoundedSemaphore(self.threads)
+
     def run(self):
         print("-"*25 + "Start PortScanner" + "-"*25)
-        if self.thread():
-            print("-"*27 + "End PortScanner" + "-"*25)
+        self.thread()
+        print("-"*27 + "End PortScanner" + "-"*25)
 
     def scan(self, port):
+        self.threadmax.acquire()
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(5)
         try:
             if sock.connect_ex((self.host, port)) == 0:
                 print("[+]Host:" + self.host + " is opening " + str(port))
-            else:
-                pass
         except:
             pass
+        finally:
+            self.threadmax.release()
 
-    def thread(self) -> bool:
-        threadpool = concurrent.futures.ThreadPoolExecutor(max_workers = self.threads)
-        futures = (threadpool.submit(self.scan, port) for port in range(self.Sport, self.Eport + 1))
-        for i in concurrent.futures.as_completed(futures):
-            pass
-        return True
+    def thread(self):
+        threadmax = threading.BoundedSemaphore(self.threads)
+        for port in range(self.Sport, self.Eport + 1):
+            _thread = threading.Thread(target=self.scan, args=(port,))
+            _thread.setDaemon(True)
+            _thread.start()
+            self.threadpool.append(_thread)
+        while True:
+            alive = False
+            for th in self.threadpool:
+                alive = alive or th.isAlive()
+            if not alive:
+                break
 
 if __name__ == "__main__":  
     if len(sys.argv) == 1:
@@ -80,6 +92,7 @@ if __name__ == "__main__":
             portscanner.run()
             spend_time = (datetime.datetime.now() - start_time).seconds
             print("Total time: " + str(spend_time) + " seconds")
-        except:
-            print("Args ERROR!")
+        except Exception as e :
+            print(e)
+            print("Something ERROR!")
             exit()
